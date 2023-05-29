@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blockchain Decision Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 15px;
+        }
+
+        #description {
+            margin-bottom: 15px;
+        }
+
+        #choices {
+            margin-bottom: 15px;
+        }
+
+        #results {
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 5px 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Blockchain Decision Game</h1>
+<div id="description"></div>
+<div id="choices"></div>
+<div id="results"></div>
+<img id="victory-image" style="display: none;">
+<button id="reset-button" style="display: none;">Restart Game</button>
+
+<script>
+    class Player {
+        constructor(role) {
+            this.role = role;
+            this.score = 0;
+        }
+
+        makeDecision(choices) {
+            let decision = prompt(`As a ${this.role}, what would you do? ${choices.map((choice, i) => `${i + 1}. ${choice}`).join("\n")}`);
+            return decision;
+        }
+    }
+
+    class Scenario {
+        constructor(description, choices, results) {
+            this.description = description;
+            this.choices = choices;
+            this.results = results;
+        }
+    }
+
+    class Game {
+        constructor(players, scenarios) {
+            this.players = players;
+            this.scenarios = scenarios;
+            this.gameOver = false;
+            this.victoryImage = document.getElementById('victory-image');
+            this.resetButton = document.getElementById('reset-button');
+            this.resetButton.addEventListener('click', () => this.resetGame());
+        }
+
+        displayVictory(winningPlayer) {
+            // Set the source of the victory image
+            this.victoryImage.src = 'https://cdn.pixabay.com/photo/2015/01/08/18/24/children-593313_1280.jpg';  // Replace 'URL_OF_IMAGE' with the actual URL of the image
+
+            // Show the victory image and the reset button
+            this.victoryImage.style.display = 'block';
+            this.resetButton.style.display = 'block';
+
+            this.gameOver = true;
+        }
+
+        resetGame() {
+            // Hide the victory image and the reset button
+            this.victoryImage.style.display = 'none';
+            this.resetButton.style.display = 'none';
+
+            // Reset the scores of all players
+            for (let player of this.players) {
+                player.score = 0;
+            }
+
+            // Reset the game state
+            this.gameOver = false;
+
+            // Continue with the game
+            this.play();
+        }
+        play() {
+            while (!this.gameOver) {
+                let scenario = this.scenarios[Math.floor(Math.random() * this.scenarios.length)];
+                alert(scenario.description);
+                for (let player of this.players) {
+                    let decision;
+                    do {
+                        decision = player.makeDecision(scenario.choices);
+                    } while (decision < 1 || decision > scenario.choices.length);
+
+                    let [result, scoreChanges] = scenario.results[decision - 1];
+                    player.score += scoreChanges[player.role];
+                    alert(`${player.role} chose ${scenario.choices[decision - 1]}, ${result}\n`);
+
+                    if (player.score >= 5) {
+                        alert(`${player.role} has reached 5 points and won the game!`);
+                        this.displayVictory(player);
+                        return;
+                    }
+                }
+                for (let player of this.players) {
+                    alert(`The ${player.role} scored ${player.score}`);
+                }
+            }
+        }
+
+        displayVictory(winningPlayer) {
+            let imageElement = document.getElementById('victory-image');
+            let buttonElement = document.getElementById('reset-button');
+
+            // Set the source of the image to the URL of the victory image
+            // Note: replace 'URL_OF_IMAGE' with the actual URL of the image
+            imageElement.src = 'https://cdn.pixabay.com/photo/2015/01/08/18/24/children-593313_1280.jpg';
+
+            // Make the image visible
+            imageElement.style.display = 'block';
+
+            // Set the text of the button
+            buttonElement.innerHTML = 'Restart Game';
+
+            // Add a click event listener to the button to reset the game
+            buttonElement.addEventListener('click', () => {
+                this.resetGame();
+            });
+
+            // Make the button visible
+            buttonElement.style.display = 'block';
+
+            this.gameOver = true;
+        }
+    }
+
+
+    // Define the roles, scenarios, choices, and results
+    let roles = ["Blockchain Developer", "End-User", "Regulator", "Investor"];
+    let scenarios = [
+        new Scenario(
+            "A blockchain startup is developing a supply chain application...",
+            ["Increase transparency completely", "Maintain some level of privacy"],
+            [
+                ["This may expose small suppliers, impacting their business negatively.", {"Blockchain Developer": -1, "End-User": 1, "Regulator": -1, "Investor": 0}],
+                ["This balances transparency and privacy.", {"Blockchain Developer": 1, "End-User": 0, "Regulator": 1, "Investor": 1}]
+            ]
+        ),
+        new Scenario(
+            "A company is developing a blockchain-based platform for storing academic credentials...",
+            ["Store all academic records on the blockchain", "Store only degrees and certifications on the blockchain"],
+            [
+                ["This provides complete transparency but raises concerns about privacy and data security.", {"Blockchain Developer": 1, "End-User": -1, "Regulator": -1, "Investor": 1}],
+                ["This protects some student data but may not provide a complete picture of a student's academic history.", {"Blockchain Developer": 0, "End-User": 1, "Regulator": 1, "Investor": 0}]
+            ]
+        ),
+        new Scenario(
+            "A school is considering using a blockchain-based system for student attendance...",
+            ["Implement the system for all grades", "Implement the system only for higher grades"],
+            [
+                ["This provides accurate attendance records but may be too complex for younger students to use.", {"Blockchain Developer": 1, "End-User": -1, "Regulator": 0, "Investor": 1}],
+                ["This restricts the use of the technology to students who can understand it, but may miss out on potential benefits for younger students.", {"Blockchain Developer": 0, "End-User": 1, "Regulator": 1, "Investor": -1}]
+            ]
+        ),
+        new Scenario(
+            "A university is considering issuing blockchain-based diplomas...",
+            ["Issue both traditional and blockchain-based diplomas", "Issue only blockchain-based diplomas"],
+            [
+                ["This gives graduates options, but increases administrative work.", {"Blockchain Developer": 0, "End-User": 1, "Regulator": 1, "Investor": 0}],
+                ["This fully adopts the new technology, but may cause difficulties for graduates in places where blockchain is not recognized.", {"Blockchain Developer": 1, "End-User": -1, "Regulator": -1, "Investor": 1}]
+            ]
+        ),
+        new Scenario(
+            "A school district is considering using a blockchain-based platform for tracking student behavior...",
+            ["Use blockchain for all behavioral records", "Only use blockchain for severe disciplinary actions"],
+            [
+                ["This provides comprehensive behavioral data but may raise privacy concerns.", {"Blockchain Developer": 1, "End-User": -1, "Regulator": -1, "Investor": 1}],
+                ["This limits data exposure but may not provide a complete picture of student behavior.", {"Blockchain Developer": -1, "End-User": 1, "Regulator": 1, "Investor": 0}]
+            ]
+        ),
+        new Scenario(
+            "An edtech startup is developing a blockchain system for a global online university...",
+            ["Build a global system", "Build regional systems"],
+            [
+                ["This provides access to students worldwide but may face regulatory issues.", {"Blockchain Developer": 1, "End-User": 0, "Regulator": -1, "Investor": 1}],
+                ["This allows for customization to local regulations but may limit accessibility.", {"Blockchain Developer": 0, "End-User": -1, "Regulator": 1, "Investor": -1}]
+            ]
+        ),
+        new Scenario(
+            "A university is considering using blockchain for student elections...",
+            ["Implement blockchain voting for all student elections", "Implement blockchain voting only for major elections"],
+            [
+                ["This increases transparency but may be unnecessary for smaller elections.", {"Blockchain Developer": 1, "End-User": 0, "Regulator": 0, "Investor": 1}],
+                ["This limits the use of technology but reduces resource usage.", {"Blockchain Developer": -1, "End-User": 1, "Regulator": 0, "Investor": -1}]
+            ]
+        ),
+        new Scenario(
+            "A company is creating a blockchain-based platform for lifelong learning records...",
+            ["Include all types of learning experiences", "Only include formal education"],
+            [
+                ["This provides a comprehensive record but may contain irrelevant information.", {"Blockchain Developer": 1, "End-User": 0, "Regulator": -1, "Investor": 1}],
+                ["This limits the scope of the record but ensures relevance.", {"Blockchain Developer": -1, "End-User": 1, "Regulator": 1, "Investor": 0}]
+            ]
+        ),
+        new Scenario(
+            "A school is considering using a blockchain-based system for parent-teacher communications...",
+            ["Implement the system for all communications", "Only implement the system for formal communications"],
+            [
+                ["This ensures transparency but may be too formal for casual conversations.", {"Blockchain Developer": 1, "End-User": -1, "Regulator": 0, "Investor": 1}],
+                ["This restricts the use of technology but ensures appropriateness.", {"Blockchain Developer": -1, "End-User": 1, "Regulator": 1, "Investor": 0}]
+            ]
+        ),
+        new Scenario(
+            "A platform is being built for blockchain-based peer-to-peer tutoring...",
+            ["Allow anyone to become a tutor", "Only allow certified teachers to become tutors"],
+            [
+                ["This increases availability but may impact the quality of teaching.", {"Blockchain Developer": 1, "End-User": -1, "Regulator": -1, "Investor": 1}],
+                ["This ensures quality but may limit availability.", {"Blockchain Developer": -1, "End-User": 1, "Regulator": 1, "Investor": 0}]
+            ]
+        ),
+        new Scenario(
+            "A company is developing a blockchain system for tracking student progress in real-time...",
+            ["Use the system for all subjects", "Only use the system for core subjects"],
+            [
+                ["This provides comprehensive data but may overwhelm students and teachers.", {"Blockchain Developer": 1, "End-User": -1, "Regulator": 0, "Investor": 1}],
+                ["This focuses data collection but may miss out on important information in non-core subjects.", {"Blockchain Developer": -1, "End-User": 1, "Regulator": 1, "Investor": 0}]
+            ]
+        ),
+        new Scenario(
+            "A university is considering using blockchain for financial aid distribution...",
+            ["Implement blockchain for all financial aid", "Only implement blockchain for scholarships"],
+            [
+                ["This ensures transparency but may be complex for some students.", {"Blockchain Developer": 1, "End-User": -1, "Regulator": 0, "Investor": 1}],
+                ["This simplifies the process but may not provide complete transparency.", {"Blockchain Developer": -1, "End-User": 1, "Regulator": 1, "Investor": 0}]
+            ]
+        ),
+        new Scenario(
+            "A school district is considering using blockchain to securely store student immunization records...",
+            ["Store all health records on the blockchain", "Only store immunization records on the blockchain"],
+            [
+                ["This provides comprehensive data but raises serious privacy concerns.", {"Blockchain Developer": 1, "End-User": -1, "Regulator": -1, "Investor": 1}],
+                ["This focuses on essential information but may not provide a complete health picture.", {"Blockchain Developer": -1, "End-User": 1, "Regulator": 1, "Investor": 0}]
+            ]
+        ),
+        new Scenario(
+            "A company is developing a blockchain system for tracking student progress in real-time...",
+            ["Use the system for all subjects", "Only use the system for core subjects"],
+            [
+                ["This provides comprehensive data but may overwhelm students and teachers.", {"Blockchain Developer": 1, "End-User": -1, "Regulator": 0, "Investor": 1}],
+                ["This focuses data collection but may miss out on important information in non-core subjects.", {"Blockchain Developer": -1, "End-User": 1, "Regulator": 1, "Investor": 0}]
+            ]
+        ),
+        new Scenario(
+            "A university is considering using blockchain for financial aid distribution...",
+            ["Implement blockchain for all financial aid", "Only implement blockchain for scholarships"],
+            [
+                ["This ensures transparency but may be complex for some students.", {"Blockchain Developer": 1, "End-User": -1, "Regulator": 0, "Investor": 1}],
+                ["This simplifies the process but may not provide complete transparency.", {"Blockchain Developer": -1, "End-User": 1, "Regulator": 1, "Investor": 0}]
+            ]
+        ),
+        new Scenario(
+            "A school district is considering using blockchain to securely store student immunization records...",
+            ["Store all health records on the blockchain", "Only store immunization records on the blockchain"],
+            [
+                ["This provides comprehensive data but raises serious privacy concerns.", {"Blockchain Developer": 1, "End-User": -1, "Regulator": -1, "Investor": 1}],
+                ["This focuses on essential information but may not provide a complete health picture.", {"Blockchain Developer": -1, "End-User": 1, "Regulator": 1, "Investor": 0}]
+            ]
+        ),
+    ];
+
+    // Create players and assign them roles
+    let players = roles.map(role => new Player(role));
+
+    // Create the game and play
+    let game = new Game(players, scenarios);
+    game.play();
+</script>
+</body>
+</html>
