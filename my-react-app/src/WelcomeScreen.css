@@ -1,0 +1,27 @@
+.welcome-screen {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-image: url('../public/sources/bg.gif');
+    transition: opacity 1s ease-in-out;
+    cursor: pointer;
+    z-index: 2; /* Ensure this is higher than other elements */
+    background-size: cover;
+  }
+  
+  .welcome-screen.fade-out {
+    opacity: 0;
+    pointer-events: none; /* 防止动画后还能点击 */
+  }
+  
+  h1, p {
+    color: black;
+  }
+  
